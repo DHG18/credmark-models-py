@@ -11,23 +11,20 @@ from credmark.cmf.types.ledger import TokenTransferTable
 
 
 @Model.describe(
-    slug="account.portfolio",
+    slug="contrib.debt-dao-wallet-composition",
     version="1.0",
-    display_name="Account Portfolio",
-    description="All of the token holdings for an account",
+    display_name="Wallet Composition",
+    description="Retrieves asset balances for all tokens in a wallet",
     developer="Credmark",
     input=Account,
     output=Portfolio)
-class WalletInfoModel(Model):
+class WalletComposition(Model):
     def run(self, input: Account) -> Portfolio:
         token_addresses = self.context.ledger.get_erc20_transfers(
             columns=[TokenTransferTable.Columns.TOKEN_ADDRESS],
-            where=' '.join(
-                [f"{TokenTransferTable.Columns.FROM_ADDRESS}='{input.address}'",
-                 "or",
-                 f"{TokenTransferTable.Columns.TO_ADDRESS}='{input.address}'"]))
-
-        print("token addresses: ", token_addresses)
+            where=f'{TokenTransferTable.Columns.TO_ADDRESS}=\'{input.address}\' \
+        or {TokenTransferTable.Columns.FROM_ADDRESS}=\'{input.address}\'')
+        # all ERC20 transfers that involved the address (token_addresses returns empty)
         positions = []
         positions.append(
             NativePosition(
